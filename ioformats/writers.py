@@ -1,3 +1,5 @@
+import logging
+
 from ioformats import availableWriters,TEXT,TABLE,BIBLIOGRAPHY
 
 
@@ -46,14 +48,16 @@ class AbstractWriter():
 
     def openSheet(self, sheetName: str, sheetType=TEXT, numbered=False, resetCount=True, **kargs): #TODO: rename ???
         self.sheetName = sheetName
-        self.sheetType = sheetType if sheetType in self.getSupportedTypes() else self.getSupportedTypes()[0] #TODO: log error
+        if sheetType in self.getSupportedTypes():
+            self.sheetType = sheetType
+        else:
+            logging.warning('Unsupported Sheet Type: '+sheetType+' for '+sheetName+'; Reverting to text.')
+            self.sheetType = TEXT
         if resetCount: # not that resetCount => numbered
             self.currentline[self.sheetType] = 0
         elif not numbered:
             self.currentline[self.sheetType] = -1
 
-            
-    
     def _incLineCount(self):
         '''increment line count only if enabled i.e. > -1'''
         if self.currentline[self.sheetType] > -1:
