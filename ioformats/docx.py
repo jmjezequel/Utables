@@ -1,9 +1,12 @@
+import logging
+
 import docx # requires pip install python-docx
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from numbers import Number
 from ioformats.filerw import FileWriter
 from ioformats.writers import SkipWriter
 from ioformats import availableWriters,TEXT,TABLE,BIBLIOGRAPHY
+
 
 class DocxWriter(FileWriter):
     def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False):
@@ -34,7 +37,7 @@ class DocxWriter(FileWriter):
                 _deleteElement(par)
 
     def _getElementsBetween(self,startTag,endtag):
-        '''return list of elements between the two marks, non including them, ie ]startTag,endtag['''
+        """return list of elements between the two marks, non including them, ie ]startTag,endtag["""
         result = None
         for p in self.doc.paragraphs:
             text = p.text
@@ -48,14 +51,14 @@ class DocxWriter(FileWriter):
 
 
     def _lookForParagraph(self,key):
-        ''' look for a paragraph starting with key'''
+        """ look for a paragraph starting with key"""
         for p in self.doc.paragraphs:
             if p.text.startswith(key):
                 return p
         return None
                 
     def _lookForTable(self,key):
-        ''' look for a table whose cell[0,0] starts with key'''
+        """ look for a table whose cell[0,0] starts with key"""
         for t in self.doc.tables:
             c = t.cell(0,0)
             if c != None and c.text.startswith(key):
@@ -99,7 +102,8 @@ class TableSubwriter():
         if self.parent.editMode: # sheetname is interpreted as the placeholder in the doc where new text should be inserted
             self.oldtable = self.parent._lookForTable(sheetname) 
             if self.oldtable == None:
-                self.parent.subwriter = SkipWriter() # TODO: log some error
+                logging.warning('Cannot find mark '+sheetname+ ' in document '+self.parent.target)
+                self.parent.subwriter = SkipWriter()
                 return
         else: # prepare for further edit in the future
             self.parent.doc.add_heading(sheetname, 3) # add at level 3
@@ -146,7 +150,7 @@ class TableSubwriter():
         if self.getLine() == 0 and self.col == 0: # Insert Mark
             mark = par.add_run(self.parent.sheetName)
             mark.font.hidden = True
-        if self.oldtable != None:
+        if self.oldtable is not None:
             par.style = self.oldtable.cell(0,0).paragraphs[0].style
             try:
                 oldcell = self.oldtable.cell(self.getLine(),self.col)
@@ -166,12 +170,12 @@ class TableSubwriter():
         for style,value in kwargs.items():
             setattr(run, style, value)
     
-    def writeTitle(self,element,** kwargs): 
-        ''' write a title line onto table'''
-        iter = self._setupTable(element)
+    def writeTitle(self,element,** kwargs):
+        """ write a title line onto table"""
+        it = self._setupTable(element)
         if not self.parent.editMode:
             kwargs['bold'] = True
-        self._writeNewRow(iter,** kwargs)
+        self._writeNewRow(it, ** kwargs)
         
     def append(self,element,** kwargs):
         if self.col >= self.width:
@@ -182,6 +186,7 @@ class TableSubwriter():
     def writeln(self,iterable,** kwargs):
         iter = self._setupTable(iterable)
         self._writeNewRow(iter,** kwargs)
+
 
 class TextSubwriter():
     def __init__(self,parent=None):
@@ -194,7 +199,8 @@ class TextSubwriter():
         if self.parent.editMode: # sheetname is interpreted as the placeholder in the doc where new text should be inserted
             self.startMark = self.parent._lookForParagraph(sheetname) 
             if self.startMark == None:
-                self.parent.subwriter = SkipWriter() # TODO: log some error
+                logging.warning('Cannot find mark '+sheetname+ ' in document '+self.parent.target)
+                self.parent.subwriter = SkipWriter()
             else: # prepare for further edit in the future
                 self.endMark = self.parent._lookForParagraph(sheetname+'.END')
                 if self.endMark == None: #First insertion, add an end point marker

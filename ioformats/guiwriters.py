@@ -8,14 +8,14 @@ class GuiWriter(AbstractWriter):
         self.gui = gui
         self.col = 0
  
-    def openSheet(self,sheetName,sheetType=TEXT,**kwargs):
+    def openSheet(self, sheetName, sheetType=TEXT, **kwargs):
         super().openSheet(sheetName,sheetType,**kwargs)
         self.currentSheet = self.gui.createTab(self.target, sheetName, sheetType)
         self.setLineNumber(0,TABLE)
 
     def writeTitle(self,iterable,** kwargs):
         self._writeln(iterable,True)
-        self.setLineNumber(0)
+        self.setLineNumber(1)
         
     def writeln(self,iterable,** kwargs):
         self._writeln(iterable,False)
@@ -33,7 +33,6 @@ class GuiWriter(AbstractWriter):
              self.col = 0
         elif  self.sheetType == BIBLIOGRAPHY or self.sheetType == TEXT:
             self.gui.insertText(self.currentSheet,'\n'+self.getLinePrefix())
-        
 
     def _writeln(self,iterable,isTitle):
         self.startNewLine()
@@ -52,7 +51,7 @@ class GuiWriter(AbstractWriter):
             self.col += 1
 
     def _writeBibItem(self,publication):
-        self.gui.insertText(self.currentSheet,' '.join(str(x) for x in iterable)+'\n')
+        self.gui.insertText(self.currentSheet,' '.join(str(x) for x in publication)+'\n')
 
     def _writeText(self,iterable):
         self.gui.insertText(self.currentSheet,' '.join(str(x) for x in iterable)+'\n')

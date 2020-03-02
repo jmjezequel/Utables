@@ -1,3 +1,4 @@
+import logging
 import unicodedata
 import sys
 import os
@@ -12,7 +13,7 @@ def normalize(name):
     return _pattern.sub('',unicodedata.normalize('NFKD', name.strip()).encode('ascii','ignore').decode('ascii')).replace(' ','_').replace('__','_')
 
 class FileWriter(AbstractWriter):
-    ''' an abstract class for writers needing to deal with the file system'''
+    """ an abstract class for writers needing to deal with the file system"""
     def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False):
         super().__init__(numbered)
         self._outputDir = outputDir
@@ -25,11 +26,11 @@ class FileWriter(AbstractWriter):
         os.makedirs(outdir, exist_ok=True)
 
     def getSheetFilename(self):
-        ''' return filename, appended with normalized name of sheetName if !=None'''
+        """ return filename, appended with normalized name of sheetName if !=None"""
         return self._outputDir+"/"+self.target+'-'+normalize(self.sheetName)+self.extension
 
     def getFilename(self):
-        ''' return filename for saving'''
+        """ return filename for saving"""
         return self._outputDir+"/"+self.target+self.extension
     
     def getBasename(self, filename):
@@ -45,7 +46,9 @@ class FileWriter(AbstractWriter):
     def open(self, filename):
         super().open(self.getBasename(filename))
         if not os.path.exists(filename):
-            self.editMode = False #no file to read from, so force editMode to False
+            if self.editMode:
+                logging.warning('Switching to editMode=False because cannot find file for editing '+filename)
+                self.editMode = False #no file to read from, so force editMode to False
         if self.editMode:
             self.doc = self._getopendoc(filename)
         else:
