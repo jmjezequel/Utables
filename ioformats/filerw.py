@@ -14,8 +14,8 @@ def normalize(name):
 
 class FileWriter(AbstractWriter):
     """ an abstract class for writers needing to deal with the file system"""
-    def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False):
-        super().__init__(numbered)
+    def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False, * supported: str):
+        super().__init__(numbered, * supported)
         self._outputDir = outputDir
         self.multiSheetOutput = multiSheetOutput
         self.editMode = editMode

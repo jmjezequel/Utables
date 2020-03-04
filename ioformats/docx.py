@@ -5,12 +5,12 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from numbers import Number
 from ioformats.filerw import FileWriter
 from ioformats.writers import SkipWriter
-from ioformats import availableWriters,TEXT,TABLE,BIBLIOGRAPHY
+from ioformats import availableWriters,TEXT,TABLE,BIBLIOGRAPHY,LIST
 
 
 class DocxWriter(FileWriter):
     def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False):
-        super().__init__(numbered,outputDir,multiSheetOutput,editMode)
+        super().__init__(numbered,outputDir,multiSheetOutput,editMode,TEXT,TABLE,BIBLIOGRAPHY,LIST)
         self.extension = '.docx'
         self.subwriter = TextSubwriter(self)
         

@@ -1,10 +1,10 @@
 from ioformats.writers import AbstractWriter
-from ioformats import availableWriters,TEXT,TABLE,BIBLIOGRAPHY
+from ioformats import availableWriters,TEXT,TABLE,BIBLIOGRAPHY,LIST
 
        
 class GuiWriter(AbstractWriter):    
-    def __init__(self, gui=None, numbered=False): 
-        super().__init__(numbered)
+    def __init__(self, gui=None, numbered=False):
+        super().__init__(numbered,TEXT,TABLE,BIBLIOGRAPHY,LIST)
         self.gui = gui
         self.col = 0
  
@@ -24,7 +24,7 @@ class GuiWriter(AbstractWriter):
         if self.sheetType == TABLE:
             self.gui.createCell(self.currentSheet,self.getCurrentLine(),self.col,element,False)
             self.col += 1
-        elif self.sheetType == BIBLIOGRAPHY or self.sheetType == TEXT:
+        else:
             self.gui.insertText(self.currentSheet,element)
 
     def startNewLine(self):

@@ -1,6 +1,7 @@
 TABLE='table'
 TEXT='text'
 BIBLIOGRAPHY='bibliography'
+LIST='list'
 
 availableWriters = {}
 

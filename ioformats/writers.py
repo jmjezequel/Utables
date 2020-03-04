@@ -4,7 +4,7 @@ from ioformats import availableWriters,TEXT,TABLE,BIBLIOGRAPHY
 
 
 class AbstractWriter():
-    def __init__(self,numbered=False):
+    def __init__(self, numbered: bool, * supported: str):
         self.target = None #TODO: rename docName
         self.currentSheet = None
         self.sheetType = None
@@ -12,21 +12,21 @@ class AbstractWriter():
         self.currentline = {}
         self.numberPrefix = '['
         self.numberSuffix = '] '
-        self.setLineNumber(0 if numbered else -1,TEXT,TABLE,BIBLIOGRAPHY) #-1 stands for no line count for this type
+        self.setLineNumber(0 if numbered else -1, * supported) #-1 stands for no line count for this type
 
     def setLineNumber(self, value: int, * types):
-        ''' Enable line counting at value=value for each type in types, unless value=-1'''
+        """ Enable line counting at value=value for each type in types, unless value=-1"""
         if len(types) == 0: # set the current type
             self.currentline[self.sheetType] = value
         else:
-            for type in types:
-                self.currentline[type] = value
+            for t in types:
+                self.currentline[t] = value
 
     def resetLineNumber(self, * types):
-        if types == None:
+        if types is None:
             types = self.currentline.key()
-        for type in types:
-            self.currentline[type] = 0 if self.currentline[type]>=0 else -1 # reset to either 0 if counted, or -1 if
+        for t in types:
+            self.currentline[t] = 0 if self.currentline[t] >= 0 else -1 # reset to either 0 if counted, or -1 if
             # not numbered
 
     def isNumbered(self):
@@ -52,7 +52,7 @@ class AbstractWriter():
             self.sheetType = sheetType
         else:
             logging.warning('Unsupported Sheet Type: '+sheetType+' for '+sheetName+'; Reverting to text.')
-            self.sheetType = TEXT
+            self.sheetType = list(self.getSupportedTypes())[0]
         if resetCount: # not that resetCount => numbered
             self.currentline[self.sheetType] = 0
         elif not numbered:

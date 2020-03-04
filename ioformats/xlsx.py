@@ -3,14 +3,13 @@ import sys
 from openpyxl import Workbook, load_workbook
 from openpyxl.formula.translate import Translator
 from ioformats.filerw import FileWriter, normalize
-from ioformats import availableWriters,TEXT,TABLE,BIBLIOGRAPHY
+from ioformats import availableWriters,TABLE,BIBLIOGRAPHY
 
 class XlsxWriter(FileWriter):
     def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False):
-        super().__init__(numbered,outputDir,multiSheetOutput,editMode)
+        super().__init__(numbered,outputDir,multiSheetOutput,editMode,TABLE,BIBLIOGRAPHY)
         self.extension = '.xlsx'
         self.col = 1
-
 
     def _getopendoc(self,name=None):
         if name == None:
