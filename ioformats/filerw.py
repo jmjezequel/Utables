@@ -14,11 +14,12 @@ def normalize(name):
 
 class FileWriter(AbstractWriter):
     """ an abstract class for writers needing to deal with the file system"""
-    def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False, * supported: str):
+    def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False,extension=None,* supported: str):
         super().__init__(numbered, * supported)
         self._outputDir = outputDir
         self.multiSheetOutput = multiSheetOutput
         self.editMode = editMode
+        self.extension = extension
         self.doc = None
     
     def setOutputDir(self,outdir):
@@ -34,7 +35,7 @@ class FileWriter(AbstractWriter):
         return self._outputDir+"/"+self.target+self.extension
     
     def getBasename(self, filename):
-        ''' return basename, without dir prefix and without file extension'''
+        """ return basename, without dir prefix and without file extension"""
         return os.path.basename(os.path.splitext(filename)[0])
 
     def _getopendoc(self,name=None):

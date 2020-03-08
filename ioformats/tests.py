@@ -1,8 +1,17 @@
 import unittest
+from datetime import datetime
 
-class TestStringMethods(unittest.TestCase):
+TABLE = [
+    ['Test Table', 'String', 'Int', 'Float', 'Date'],
+    ['Line 1', 'foo', 42, 3.14, datetime(2000,1,1)],
+    ['Line 2', 'bar', 6666666, 0.14, datetime(2020, 1, 1)],
+    ['Line 3', '%èé&à', None, 0, None],
+]
+
+class TestWriterMethods(unittest.TestCase):
     def setUp(self):
         pass
+
     def tearDown(self):
         pass
     
@@ -20,6 +29,6 @@ class TestStringMethods(unittest.TestCase):
         with self.assertRaises(TypeError):
             s.split(2)
 
+
 if __name__ == '__main__':
     unittest.main()
-    

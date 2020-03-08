@@ -7,12 +7,11 @@ from ioformats import availableWriters,TABLE,BIBLIOGRAPHY
 
 class XlsxWriter(FileWriter):
     def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False):
-        super().__init__(numbered,outputDir,multiSheetOutput,editMode,TABLE,BIBLIOGRAPHY)
-        self.extension = '.xlsx'
+        super().__init__(numbered,outputDir,multiSheetOutput,editMode,'.xlsx',TABLE,BIBLIOGRAPHY)
         self.col = 1
 
     def _getopendoc(self,name=None):
-        if name == None:
+        if name is None:
             return Workbook(write_only=True) # return a fresh one
         return load_workbook(name)
     
@@ -31,7 +30,7 @@ class XlsxWriter(FileWriter):
         self.col = 1
 
     def writeTitle(self,iterable,always=False,**kwargs):
-        ''' write a title line. if 'always', does it even in editing mode'''
+        """ write a title line. if 'always', does it even in editing mode"""
         if always or not self.editMode:
             self.writeln(iterable)
     

@@ -10,8 +10,7 @@ from ioformats import availableWriters,TEXT,TABLE,BIBLIOGRAPHY,LIST
 
 class DocxWriter(FileWriter):
     def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False):
-        super().__init__(numbered,outputDir,multiSheetOutput,editMode,TEXT,TABLE,BIBLIOGRAPHY,LIST)
-        self.extension = '.docx'
+        super().__init__(numbered,outputDir,multiSheetOutput,editMode,'.docx',TEXT,TABLE,BIBLIOGRAPHY,LIST)
         self.subwriter = TextSubwriter(self)
         
     def _getopendoc(self,name=None):
@@ -41,7 +40,7 @@ class DocxWriter(FileWriter):
         result = None
         for p in self.doc.paragraphs:
             text = p.text
-            if result != None: # we have already found start tag
+            if result is not None: # we have already found start tag
                 if text==endtag:
                     return result
                 result.append(p)

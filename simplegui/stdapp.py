@@ -1,3 +1,4 @@
+import os
 from tkinter import *
 from tkinter import ttk, filedialog, simpledialog, messagebox, scrolledtext #Frame, Variable, Scrollbar, Text, 
 from tkinter.ttk import *
@@ -199,7 +200,7 @@ class StdApp:
                      defaultextension=self.model.fileExtension, 
                      initialdir=currentPath
                  )
-        if f != None:
+        if f is not None:
             self.model.saveTo(f)
         
     def fopendialog(self):
@@ -210,7 +211,7 @@ class StdApp:
                      defaultextension=self.model.fileExtension, 
                      initialdir=currentPath
                  )
-        if f != None:
+        if f is not None:
             self.model.loadFrom(f) 
 
     def configEditMenu(self,menubar):
