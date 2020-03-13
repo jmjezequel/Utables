@@ -1,14 +1,14 @@
 import logging
 import unicodedata
-import sys
 import os
 import re
 from ioformats.writers import AbstractWriter
 
 _pattern = re.compile("[^A-Za-z0-9_ ]+")
 
+
 def normalize(name):
-    if name == None:
+    if name is None:
         return None
     return _pattern.sub('',unicodedata.normalize('NFKD', name.strip()).encode('ascii','ignore').decode('ascii')).replace(' ','_').replace('__','_')
 

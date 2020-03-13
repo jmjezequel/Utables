@@ -18,8 +18,8 @@ class XlsxWriter(FileWriter):
     def _savedoc(self,filename):
         self.doc.save(filename)
 
-    def openSheet(self,sheetname,sheetType=TABLE,**kwargs):
-        super().openSheet(sheetname,sheetType,**kwargs)
+    def openSheet(self,sheetname,sheetType=TABLE,*args,**kwargs):
+        super().openSheet(sheetname,sheetType,*args,**kwargs)
         if self.editMode:
             self.currentSheet = self.doc[sheetname]
         else:

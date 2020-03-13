@@ -10,7 +10,7 @@ __all__ = [
     'writers',
     'availableWriters',
     'csv',
-    'docx',
+    'docxrw',
     'guiwriters',
     'inmemory',
     'tex',

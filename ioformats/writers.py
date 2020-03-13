@@ -37,7 +37,10 @@ class AbstractWriter():
     
     def getSupportedTypes(self):
         return self.currentline.keys()
-    
+
+    def isSupporting(self, sheetType: str):
+        return sheetType in self.getSupportedTypes()
+
     def getLinePrefix(self):
         return self.numberPrefix+str(self.getCurrentLine())+self.numberSuffix if self.isNumbered() else ""
         

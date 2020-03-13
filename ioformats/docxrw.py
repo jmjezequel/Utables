@@ -1,26 +1,28 @@
 import logging
 
-import docx # requires pip install python-docx
+import docx  # requires pip install python-docx
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from numbers import Number
 from ioformats.filerw import FileWriter
 from ioformats.writers import SkipWriter
 from ioformats import availableWriters,TEXT,TABLE,BIBLIOGRAPHY,LIST
 
+ENDTAG = '.END-OF-GENERATED-TEXT'
 
 class DocxWriter(FileWriter):
     def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False):
         super().__init__(numbered,outputDir,multiSheetOutput,editMode,'.docx',TEXT,TABLE,BIBLIOGRAPHY,LIST)
         self.subwriter = TextSubwriter(self)
-        
+        self.visible_insertion_marks = False
+
     def _getopendoc(self,name=None):
         return docx.Document(name)
     
     def _savedoc(self,filename):
         self.doc.save(filename)
 
-    def openSheet(self,sheetname,sheetType=TEXT,**kwargs):
-        super().openSheet(sheetname,sheetType,**kwargs)
+    def openSheet(self,sheetname,sheetType=TEXT,*args,**kwargs):
+        super().openSheet(sheetname,sheetType,*args,**kwargs)
         self.subwriter = subwriters.get(sheetType,SkipWriter)(self)
         self.subwriter.openSheet(sheetname,sheetType,**kwargs)
 
@@ -60,7 +62,7 @@ class DocxWriter(FileWriter):
         """ look for a table whose cell[0,0] starts with key"""
         for t in self.doc.tables:
             c = t.cell(0,0)
-            if c != None and c.text.startswith(key):
+            if c is not None and c.text.startswith(key):
                 return t
         return None
                 
@@ -197,19 +199,21 @@ class TextSubwriter():
         self.kwargs = kwargs
         if self.parent.editMode: # sheetname is interpreted as the placeholder in the doc where new text should be inserted
             self.startMark = self.parent._lookForParagraph(sheetname) 
-            if self.startMark == None:
+            if self.startMark is None:
                 logging.warning('Cannot find mark '+sheetname+ ' in document '+self.parent.target)
                 self.parent.subwriter = SkipWriter()
             else: # prepare for further edit in the future
-                self.endMark = self.parent._lookForParagraph(sheetname+'.END')
+                self.endMark = self.parent._lookForParagraph(sheetname+ENDTAG)
                 if self.endMark == None: #First insertion, add an end point marker
                     self.endMark = self.startMark
-                    run = self.endMark.add_run('.END')
-                    _makeParagraphInvisible(self.endMark)
-                    self.startMark =  self.endMark.insert_paragraph_before(sheetname,style=self.endMark.style) # put back start marker
-                    _makeParagraphInvisible(self.startMark)
+                    run = self.endMark.add_run(ENDTAG)
+                    self.startMark = self.endMark.insert_paragraph_before(sheetname,style=self.endMark.style) # put back start marker
+                    self.startMark.add_run(" GENERATED TEXT: DO NOT MODIFY")
                 else: #must first remove paragraphs between startMark and endMark
                     self.parent._deleteBetween(self.startMark,self.endMark)
+                if not self.parent.visible_insertion_marks:
+                    _makeParagraphInvisible(self.endMark)
+                    _makeParagraphInvisible(self.startMark)
         else:
             # add a page break to start a new page 
             # self.doc.add_page_break()
@@ -218,14 +222,14 @@ class TextSubwriter():
     def closeSheet(self):
         self.startMark.paragraph_format.keep_with_next = True #to prevent unfortunate separation on page breaks
     
-    def writeTitle(self,element,** kwargs):
+    def writeTitle(self,element,level=1,** kwargs):
         """ write a title line onto paragraph"""
         if self.parent.editMode:
             #caveat can only add_heading at the end of doc
             self.startNewLine()
-            self.append(element,** kwargs)
+            self.append(element,bold=True,** kwargs)
         else:
-            self.parent.doc.add_heading(element,kwargs.get('level',1))
+            self.parent.doc.add_heading(element,level)
 
     def append(self,element,** kwargs):
         self._addRunLike(element,**kwargs)
@@ -236,6 +240,7 @@ class TextSubwriter():
             self._addRunLike(self.parent.getLinePrefix(),**kwargs)
         first = True
         for elem in iterable:
+            if elem is None: elem = ''
             e = elem if first else ' '+elem
             first = False
             self._addRunLike(e, **kwargs)
@@ -268,8 +273,8 @@ class BiblioSubwriter(TextSubwriter):
     def __init__(self,parent=None):
         super().__init__(parent)
         
-    def writeTitle(self,element,** kwargs): 
-        ''' write a title line onto paragraph'''
+    def writeTitle(self,element,** kwargs):
+        """ write a title line onto paragraph"""
         l = self.parent.getCurrentLine()
         super().writeTitle(element,** kwargs)
         self.parent.setLineNumber(l-1) #don't count titles in the numbering 
@@ -289,4 +294,13 @@ class BiblioSubwriter(TextSubwriter):
 
 
 availableWriters['docx'] = DocxWriter()
-subwriters = {TEXT:TextSubwriter,TABLE:TableSubwriter,BIBLIOGRAPHY:BiblioSubwriter}
+
+
+class ListSubwriter(TextSubwriter):
+    def __init__(self,parent=None):
+        super().__init__(parent)
+
+    def writeln(self,iterable,** kwargs):
+        super().writeln(('  - ',*iterable),**kwargs)
+
+subwriters = {TEXT:TextSubwriter,TABLE:TableSubwriter,LIST:ListSubwriter,BIBLIOGRAPHY:BiblioSubwriter}
