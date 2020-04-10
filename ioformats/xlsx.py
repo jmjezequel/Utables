@@ -7,7 +7,7 @@ from ioformats import availableWriters,TABLE,BIBLIOGRAPHY
 
 class XlsxWriter(FileWriter):
     def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False):
-        super().__init__(numbered,outputDir,multiSheetOutput,editMode,'.xlsx',TABLE,BIBLIOGRAPHY)
+        super().__init__(numbered,outputDir,multiSheetOutput,editMode,'.xlsx',TABLE)
         self.col = 1
 
     def _getopendoc(self,name=None):
@@ -40,7 +40,6 @@ class XlsxWriter(FileWriter):
         else:
             self.currentSheet.append(iterable)
         self._incLineCount()
-
 
     def append(self,element,insertMode=False,** kwargs):
         line = self.getCurrentLine()

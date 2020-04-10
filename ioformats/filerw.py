@@ -12,6 +12,7 @@ def normalize(name):
         return None
     return _pattern.sub('',unicodedata.normalize('NFKD', name.strip()).encode('ascii','ignore').decode('ascii')).replace(' ','_').replace('__','_')
 
+
 class FileWriter(AbstractWriter):
     """ an abstract class for writers needing to deal with the file system"""
     def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False,extension=None,* supported: str):

@@ -25,5 +25,5 @@ class StringWriter(AbstractWriter):
 
 
 
-availableWriters['string'] = StringWriter()
-availableWriters['num-string'] = StringWriter(numbered=True)
+#availableWriters['string'] = StringWriter()
+#availableWriters['num-string'] = StringWriter(numbered=True)

@@ -11,7 +11,7 @@ ENDTAG = '.END-OF-GENERATED-TEXT'
 
 class DocxWriter(FileWriter):
     def __init__(self,numbered=False,outputDir='.',multiSheetOutput=False,editMode=False):
-        super().__init__(numbered,outputDir,multiSheetOutput,editMode,'.docx',TEXT,TABLE,BIBLIOGRAPHY,LIST)
+        super().__init__(numbered,outputDir,multiSheetOutput,editMode,'.docx')
         self.subwriter = TextSubwriter(self)
         self.visible_insertion_marks = False
 
@@ -241,7 +241,7 @@ class TextSubwriter():
         first = True
         for elem in iterable:
             if elem is None: elem = ''
-            e = elem if first else ' '+elem
+            e = elem if first else ' '+str(elem)
             first = False
             self._addRunLike(e, **kwargs)
             
@@ -285,10 +285,12 @@ class BiblioSubwriter(TextSubwriter):
             self._addRunLike(self.parent.getLinePrefix(),**kwargs)
         publication.write(self,**self.kwargs) # publication is going to call back append below
 
-    def append(self,element, venue=False, ** kwargs):
+    def append(self,element, venue=False, title=False, ** kwargs):
         if venue:
             self._addRunLike("In ")
             self._addRunLike(element,italic=True)
+        elif title:
+            self._addRunLike(element+'. ', **kwargs)
         else:
             self._addRunLike(element,**kwargs)
 

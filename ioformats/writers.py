@@ -1,7 +1,8 @@
 import logging
 
-from ioformats import availableWriters,TEXT,TABLE,BIBLIOGRAPHY
+from ioformats import availableWriters,TEXT,TABLE,BIBLIOGRAPHY,LIST
 
+ALLTYPES=(TEXT,TABLE,LIST,BIBLIOGRAPHY)
 
 class AbstractWriter():
     def __init__(self, numbered: bool, * supported: str):
@@ -12,6 +13,8 @@ class AbstractWriter():
         self.currentline = {}
         self.numberPrefix = '['
         self.numberSuffix = '] '
+        if len(supported) == 0:
+            supported = ALLTYPES
         self.setLineNumber(0 if numbered else -1, * supported) #-1 stands for no line count for this type
 
     def setLineNumber(self, value: int, * types):
@@ -43,7 +46,10 @@ class AbstractWriter():
 
     def getLinePrefix(self):
         return self.numberPrefix+str(self.getCurrentLine())+self.numberSuffix if self.isNumbered() else ""
-        
+
+    def setOutputDir(self,outdir):
+        pass
+
     def open(self, target: str):
         self.target = target
         self.resetLineNumber()
@@ -86,7 +92,7 @@ class AbstractWriter():
 
 class SkipWriter(AbstractWriter):
     def __init__(self,*args,**kargs):
-        pass
+        super().__init__(*ALLTYPES)
 
     def openSheet(self,*args,**kargs):
         pass
@@ -106,15 +112,16 @@ class SkipWriter(AbstractWriter):
     def writeln(self,iterable,** kwargs):
         pass
 
-class ConsoleWriter(AbstractWriter):#<Iterable>
+
+class ConsoleWriter(AbstractWriter):
     def __init__(self, numbered=False): 
-        super().__init__(numbered)
+        super().__init__(numbered, *ALLTYPES)
 
     def writeTitle(self,element,** kwargs): # always=false,level=1,insertMode=False,style=None
         if isinstance(element,str):
             print(self.getLinePrefix()+element)
         else:
-            self.writeln(iterable,** kwargs)
+            self.writeln(element,** kwargs)
 
     def append(self,element,** kwargs):
         print(element,nl='')
@@ -132,7 +139,7 @@ availableWriters['console'] = ConsoleWriter()
  
 
 class MultiWriter(AbstractWriter):
-    ''' multiplex several other writers'''
+    """ multiplex several other writers"""
     def __init__(self, numbered=False, * subwriterNames):
         super().__init__(numbered)
         self._subwriters = map(lambda key: availableWriters[key],subwriterNames)
@@ -173,7 +180,8 @@ class MultiWriter(AbstractWriter):
         map(lambda s: s.close(), self._subwriters)
         super().close()
  
-availableWriters['multi'] = MultiWriter()
+# availableWriters['multi'] = MultiWriter()
+
 
 def getWriter(key,**kwargs):
     w = availableWriters[key]

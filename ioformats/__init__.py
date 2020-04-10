@@ -9,10 +9,11 @@ availableWriters = {}
 __all__ = [
     'writers',
     'availableWriters',
-    'csv',
+    'csvwriter',
     'docxrw',
     'guiwriters',
     'inmemory',
     'tex',
+    'text',
     'xlsx'
 ]
