@@ -10,7 +10,7 @@ _pattern = re.compile("[^A-Za-z0-9_ ]+")
 def normalize(name):
     if name is None:
         return None
-    return _pattern.sub('',unicodedata.normalize('NFKD', name.strip()).encode('ascii','ignore').decode('ascii')).replace(' ','_').replace('__','_')
+    return _pattern.sub('',unicodedata.normalize('NFKD', name.strip()).encode('ascii','ignore').decode('ascii')).replace('\n','_').replace(' ','_').replace('__','_')
 
 
 class FileWriter(AbstractWriter):
