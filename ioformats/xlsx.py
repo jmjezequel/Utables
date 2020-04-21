@@ -1,3 +1,4 @@
+import logging
 import unicodedata
 import sys
 from openpyxl import Workbook, load_workbook
@@ -137,8 +138,8 @@ class DictReader(object):
                 next(self.reader) # skip all lines before the title
                 self.line_num += 1
             try:
-                self._fieldnames =  list(map(normalize,next(self.reader))) if self.normalize_fieldnames else next(self.reader)
-                    
+                self._fieldnames = list(map(normalize,next(self.reader))) if self.normalize_fieldnames else next(self.reader)
+                logging.info("xlsx Dictreader: "+str(self._fieldnames))
                 self.line_num += 1
             except StopIteration:
                 pass
