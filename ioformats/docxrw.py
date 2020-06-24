@@ -2,6 +2,7 @@ import logging
 
 import docx  # requires pip install python-docx
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.dml import MSO_THEME_COLOR_INDEX
 from numbers import Number
 from ioformats.filerw import FileWriter
 from ioformats.writers import SkipWriter
@@ -77,6 +78,37 @@ class DocxWriter(FileWriter):
 
     def writeln(self,iterable,** kwargs):
         self.subwriter.writeln(iterable, ** kwargs)
+
+
+def _add_hyperlink(paragraph, text, url):
+    # This gets access to the document.xml.rels file and gets a new relation id value
+    part = paragraph.part
+    r_id = part.relate_to(url, docx.opc.constants.RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+
+    # Create the w:hyperlink tag and add needed values
+    hyperlink = docx.oxml.shared.OxmlElement('w:hyperlink')
+    hyperlink.set(docx.oxml.shared.qn('r:id'), r_id, )
+
+    # Create a w:r element and a new w:rPr element
+    new_run = docx.oxml.shared.OxmlElement('w:r')
+    rPr = docx.oxml.shared.OxmlElement('w:rPr')
+
+    # Join all the xml elements together add add the required text to the w:r element
+    new_run.append(rPr)
+    new_run.text = text
+    hyperlink.append(new_run)
+
+    # Create a new Run object and add the hyperlink into it
+    r = paragraph.add_run()
+    r._r.append(hyperlink)
+
+    # A workaround for the lack of a hyperlink style (doesn't go purple after using the link)
+    # Delete this if using a template that has the hyperlink style in it
+    r.font.color.theme_color = MSO_THEME_COLOR_INDEX.HYPERLINK
+    r.font.underline = True
+
+    return r
+
 
 def _makeParagraphInvisible(par):
     for run in par.runs:
@@ -256,15 +288,18 @@ class TextSubwriter():
         self.parent._incLineCount()
 
 
-    def _addRunLike(self, elem, **kwargs):
-        run = self.paragraph.add_run(elem)
-        runmodel = self.runmodel
-        if runmodel is not None:
-            run.bold = runmodel.bold
-            run.italic = runmodel.italic
-            run.underline = runmodel.underline
-            run.font.color.rgb = runmodel.font.color.rgb
-            run.style.name = runmodel.style.name
+    def _addRunLike(self, elem, href=None, **kwargs):
+        if href is None:
+            run = self.paragraph.add_run(elem)
+            runmodel = self.runmodel
+            if runmodel is not None:
+                run.bold = runmodel.bold
+                run.italic = runmodel.italic
+                run.underline = runmodel.underline
+                run.font.color.rgb = runmodel.font.color.rgb
+                run.style.name = runmodel.style.name
+        else:
+            run = _add_hyperlink(self.paragraph, elem, href)
         for style,value in kwargs.items():
             setattr(run, style, value)
         return run
@@ -283,10 +318,12 @@ class BiblioSubwriter(TextSubwriter):
         self.startNewLine()
         if self.parent.isNumbered():
             self._addRunLike(self.parent.getLinePrefix(),**kwargs)
-        publication.write(self,**self.kwargs) # publication is going to call back append below
+        publication.write(self,**self.kwargs) # publication is going to call back 'append' below
 
-    def append(self,element, venue=False, title=False, ** kwargs):
-        if venue:
+    def append(self,element, key=False, venue=False, title=False, ** kwargs):
+        if key:
+            self._addRunLike(element,**kwargs)
+        elif venue:
             self._addRunLike("In ")
             self._addRunLike(element,italic=True)
         elif title:

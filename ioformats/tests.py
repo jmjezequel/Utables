@@ -29,7 +29,7 @@ class PublicationStub:
 
     def write(self,writer,citationStyle=None,**kwargs):
         """ use writer to output this publication in biblio form."""
-        writer.append(self.kw.get('key'),key=True)
+        writer.append(self.kw.get('key'),key=True,href='http://www.irisa.fr/')
         writer.append(self.kw.get('authors'),authors=True)
         writer.append(self.kw.get('title'),title=True)
         v = self.kw.get('venue','')
