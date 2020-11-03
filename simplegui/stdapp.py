@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from tkinter import *
 from tkinter import ttk, filedialog, simpledialog, messagebox, scrolledtext #Frame, Variable, Scrollbar, Text, 
 from tkinter.ttk import *
@@ -192,7 +193,10 @@ class StdApp:
             self.model.resave() # because model.filename not None
  
     def fsavedialog(self):
-        currentPath = os.getcwd() # Chemin courant
+        if self.model.filename is None:
+            currentPath = os.getcwd()
+        else:
+            currentPath = os.path.dirname(Path(self.model.filename))
         f = filedialog.asksaveasfile\
                  (
                      title='Save query as...',
@@ -204,7 +208,10 @@ class StdApp:
             self.model.saveTo(f)
         
     def fopendialog(self):
-        currentPath = os.getcwd() 
+        if self.model.filename is None:
+            currentPath = os.getcwd()
+        else:
+            currentPath = os.path.dirname(Path(self.model.filename))
         f = filedialog.askopenfile\
                  (
                      mode='r', 
@@ -213,6 +220,20 @@ class StdApp:
                  )
         if f is not None:
             self.model.loadFrom(f) 
+
+    def chooseDir(self, msg: str, startDir: str) -> str:
+        if startDir is None:
+            if self.model.filename is None:
+                startDir = os.getcwd()
+            else:
+                startDir = os.path.dirname(Path(self.model.filename))
+        d = filedialog.askdirectory\
+                 (
+                    title=msg,
+                    initialdir=startDir
+                 )
+        return d
+
 
     def configEditMenu(self,menubar):
         self.editmenu = Menu(menubar, tearoff=0)

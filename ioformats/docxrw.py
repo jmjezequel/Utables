@@ -333,6 +333,7 @@ class BiblioSubwriter(TextSubwriter):
 
 
 availableWriters['docx'] = DocxWriter()
+availableWriters['docx-multisheets'] = DocxWriter(multiSheetOutput=True)
 
 
 class ListSubwriter(TextSubwriter):

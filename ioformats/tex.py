@@ -136,6 +136,7 @@ class TeXTableSubwriter():
         self.startNewLine()
         self.parent.writeRaw(r"\end{tabular}")
         self.startNewLine()
+        self.startNewLine()
 
     def getExtension(self):
         return '.tex'
@@ -162,22 +163,21 @@ class BblSubwriter(PlainTextSubwriter):
 
     def writeln(self, publication, ** kwargs):
         self.startNewLine()
+        self.parent.writeRaw(r'\bibitem{', publication.getHalId(), '} ')
         publication.write(self,**self.kwargs) # publication is going to call back append below
         self.startNewLine()
 
     def append(self,element, key=False, authors=False, title=False, venue=False, ** kwargs):
-        if key:
-            self.parent.writeRaw(r'\bibitem{', element, '} ')
-        elif authors:
+        if authors:
             self.startNewLine()
-            self.parent.writeRaw(element,'.')
+            self.parent.writeRaw(element)
         elif title:
             self.startNewLine()
             self.parent.writeRaw(r'\newblock {', element, '}. ')
         elif venue:
             self.startNewLine()
             self.parent.writeRaw(r'\newblock')
-            self.parent.writeRaw("In ")
+            self.parent.writeRaw(" In ")
             self.parent.writeEncode(element)
         else:
             self.parent.writeEncode(element)

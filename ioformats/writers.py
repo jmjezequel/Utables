@@ -11,6 +11,7 @@ class AbstractWriter():
         self.sheetType = None
         self.sheetName = '' #TODO rename ??
         self.currentline = {}
+        self.multiSheetOutput = True
         self.numberPrefix = '['
         self.numberSuffix = '] '
         if len(supported) == 0:

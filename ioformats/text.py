@@ -55,3 +55,4 @@ class TextWriter(FileWriter):
 
 
 availableWriters['txt'] = TextWriter()
+availableWriters['txt-multisheets'] = TextWriter(multiSheetOutput=True)
