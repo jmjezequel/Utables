@@ -66,7 +66,26 @@ class DocxWriter(FileWriter):
             if c is not None and c.text.startswith(key):
                 return t
         return None
-                
+
+    def yieldBibKeys(self, excludingPar: str):
+        """ look for bibliographic keys surrounded by [] in a paragraphs"""
+        skipping = False
+        for p in self.doc.paragraphs:
+            if p.text.startswith(excludingPar):
+                skipping = True
+            elif p.text.startswith(ENDTAG):
+                skipping = False
+            elif not skipping:
+                i = p.text.find('[')
+                while i > -1:
+                    j = p.text.find(']',i+1)
+                    if j < 0:
+                        break
+                    keys = p.text[i+1:j].split(',') # case of more than one key eg [key1,key2]
+                    for k in keys:
+                        yield k.replace(' ', '').strip() # remove blanks and strip
+                    i = p.text.find('[',j)
+
     def writeTitle(self,element,** kwargs): # always=false,level=1,insertMode=False,style=None
         self.subwriter.writeTitle(element,** kwargs)
 
@@ -297,7 +316,10 @@ class TextSubwriter():
                 run.italic = runmodel.italic
                 run.underline = runmodel.underline
                 run.font.color.rgb = runmodel.font.color.rgb
-                run.style.name = runmodel.style.name
+                if run.style is not None:
+                    run.style.name = runmodel.style.name
+ #               else:
+ #                   run.style.name = 'Default Paragraph Font'
         else:
             run = _add_hyperlink(self.paragraph, elem, href)
         for style,value in kwargs.items():
@@ -327,7 +349,7 @@ class BiblioSubwriter(TextSubwriter):
             self._addRunLike("In ")
             self._addRunLike(element,italic=True)
         elif title:
-            self._addRunLike(element+'. ', **kwargs)
+            self._addRunLike(element+'. ',italic=True, **kwargs)
         else:
             self._addRunLike(element,**kwargs)
 

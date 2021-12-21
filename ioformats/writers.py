@@ -65,7 +65,7 @@ class AbstractWriter():
             self.sheetType = list(self.getSupportedTypes())[0]
         if resetCount: # not that resetCount => numbered
             self.currentline[self.sheetType] = 0
-        elif not numbered:
+        if not numbered:
             self.currentline[self.sheetType] = -1
 
     def _incLineCount(self):
